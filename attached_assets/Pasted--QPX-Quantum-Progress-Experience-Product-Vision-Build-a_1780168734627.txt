@@ -1,0 +1,611 @@
+# QPX — Quantum Progress Experience
+
+## Product Vision
+
+Build a world-class mobile application called **QPX (Quantum Progress Experience)**.
+
+QPX is not a habit tracker.
+
+QPX is a Real-Life RPG Progression System where users transform themselves through discipline, learning, fitness, creation, consistency, and self-development.
+
+The app should make users feel like they are playing a premium RPG game while upgrading their real life.
+
+The experience should combine:
+
+* RPG Progression Game
+* Habit Tracking System
+* Productivity Dashboard
+* Self-Improvement Platform
+* Character Evolution Simulator
+* Achievement & Reward System
+
+The entire application should feel immersive, futuristic, premium, emotional, motivating, and highly engaging.
+
+---
+
+# Core Philosophy
+
+Users do not chase results.
+
+Users chase:
+
+* XP
+* Levels
+* Ranks
+* Streaks
+* Achievements
+* Character Evolution
+* Rewards
+
+Real-world success becomes the outcome of consistent progression.
+
+Primary Philosophy:
+
+Progress > Perfection
+
+Missing a task should have consequences, but should never completely destroy long-term progress.
+
+---
+
+# First-Time Onboarding System
+
+Immediately after account creation or first login, present a premium onboarding questionnaire.
+
+The purpose is to create a personalized player profile.
+
+The app must ask 10 questions.
+
+### Questions
+
+1. What is your age?
+2. What is your current height?
+3. What is your current weight?
+4. What is your primary goal?
+5. What are your top three priorities?
+6. What skills do you want to learn?
+7. How many hours can you dedicate daily?
+8. What is your biggest weakness right now?
+9. What habits do you want to build?
+10. What type of person do you want to become in the next 1 year?
+
+Using these answers, automatically generate:
+
+* Player Profile
+* Starting Quests
+* Recommended Goals
+* Personalized Progress Plan
+* Initial Character Attributes
+
+---
+
+# Design Vision
+
+Theme:
+
+* Futuristic
+* Premium
+* Clean
+* Minimal
+* AAA Game Quality
+* Cyber Modern
+* Glassmorphism
+* Dynamic Lighting
+* Smooth Depth Effects
+
+Every screen should feel like part of a high-budget game.
+
+---
+
+# Animation System
+
+### XP Gain Animation
+
+When a task is completed:
+
+* XP particles appear
+* XP flies toward XP bar
+* XP counter increases smoothly
+
+Examples:
+
++5 XP
+
++10 XP
+
++25 XP
+
+with satisfying visual feedback.
+
+---
+
+### Level Up Animation
+
+* Screen pulse effect
+* Progress ring fills
+* Reward popup appears
+* Celebration particles trigger
+
+---
+
+### Rank Promotion Animation
+
+* Screen darkens
+* Energy effects appear
+* Rank badge emerges
+* Character evolves
+* New rank revealed dramatically
+
+Should feel like a major game achievement.
+
+---
+
+# Dashboard
+
+Display:
+
+### Player Profile
+
+* Username
+* Player ID
+* Avatar
+* Current Rank
+* Current Level
+* Current XP
+* HP
+* Coins
+* Current Streak
+
+---
+
+### Progress Section
+
+* XP Progress Bar
+* HP Bar
+* Coin Counter
+* Rank Badge
+* Current Mission
+
+---
+
+### Today's Quests
+
+Display active daily quests.
+
+Examples:
+
+* Meditation
+* Workout
+* Study
+* Reading
+* Coding
+* Project Work
+* Content Creation
+* Journal
+* Sleep Goal
+* No Junk Food
+
+---
+
+# 3D Character Evolution System
+
+The character represents the user.
+
+The character evolves alongside real-life progress.
+
+---
+
+## Recruit (Starting Character)
+
+Starting Appearance:
+
+* Lean body
+* Skinny beginner look
+* Basic posture
+* Simple training shorts
+* Simple training vest
+* No armor
+* No effects
+
+The character should visibly look like someone beginning a transformation journey.
+
+---
+
+# Character Progression
+
+As the user gains XP and clears milestones:
+
+* Better posture
+* Improved confidence
+* Stronger appearance
+* Better clothing
+* Better equipment
+* Better visual effects
+
+Every major rank should feel rewarding.
+
+---
+
+# Rank System
+
+1. Recruit
+2. Cadet
+3. Trainee
+4. Warrior
+5. Elite Warrior
+6. Champion
+7. Legend
+8. Master
+9. Grandmaster
+10. Titan
+
+Each rank unlocks:
+
+* New outfit
+* New equipment
+* New effects
+* New badge
+* New profile frame
+
+---
+
+# Badge System
+
+Create premium metallic badges.
+
+Materials:
+
+* Bronze
+* Steel
+* Silver
+* Gold
+* Platinum
+* Titanium
+* Crystal
+* Energy Core
+
+Badges should have:
+
+* 3D depth
+* Reflection
+* Shine effects
+* Premium game-quality appearance
+
+---
+
+# XP System
+
+XP is the primary progression currency.
+
+Examples:
+
+Meditation = +5 XP
+
+Workout = +10 XP
+
+Study = +15 XP
+
+Reading = +5 XP
+
+Coding = +10 XP
+
+Project Work = +15 XP
+
+Content Creation = +10 XP
+
+Journal = +5 XP
+
+No Junk Food = +5 XP
+
+Sleep Goal = +5 XP
+
+All XP values must be customizable.
+
+---
+
+# HP System
+
+HP represents discipline.
+
+Starting HP = 100
+
+Examples:
+
+Miss Study = -10 HP
+
+Miss Workout = -5 HP
+
+Waste Entire Day = -15 HP
+
+HP should visually react when damaged.
+
+---
+
+# Coin Economy System
+
+Introduce Coins as a secondary currency.
+
+Users earn Coins by:
+
+* Completing Quests
+* Maintaining Streaks
+* Defeating Boss Challenges
+* Reaching New Levels
+* Completing Seasons
+
+Coins can unlock:
+
+* Character Outfits
+* Armor Sets
+* Visual Effects
+* Themes
+* Profile Frames
+* Special Badges
+
+---
+
+# Level System
+
+Level 1 = Day 1
+
+Level 2 = Day 3
+
+Level 3 = Day 7
+
+Level 4 = Day 14
+
+Level 5 = Day 21
+
+Level 6 = Day 30
+
+Level 7 = Day 60
+
+Level 8 = Day 90
+
+Level 9 = Day 100
+
+Every level should provide rewards and progression unlocks.
+
+---
+
+# Achievement System
+
+Examples:
+
+* First Workout
+* First Journal
+* 7 Day Streak
+* 30 Day Discipline
+* 100 Hour Study
+* Coding Warrior
+* Reading Master
+* Creator Badge
+* Titan Achievement
+
+Support hundreds of possible achievements.
+
+---
+
+# Daily Login Rewards
+
+Create a reward calendar.
+
+Examples:
+
+Day 1 = Coins
+
+Day 2 = XP
+
+Day 3 = Badge Fragment
+
+Day 7 = Special Reward
+
+Day 30 = Rare Reward
+
+---
+
+# Daily Quest System
+
+Automatically generate quests from categories:
+
+* Mind
+* Body
+* Knowledge
+* Creation
+* Discipline
+* Health
+* Productivity
+
+---
+
+# Weekly Boss Battles
+
+Examples:
+
+* 7 Days No Junk Food
+* 30 Days Workout Challenge
+* Complete One Book
+* Build One Project
+* Reach Study Target
+
+Boss rewards:
+
+* Massive XP
+* Coins
+* Special Badges
+* Character Items
+
+---
+
+# Recovery System
+
+If a user fails a streak:
+
+Do not immediately reset everything.
+
+Instead:
+
+Generate Recovery Missions.
+
+Examples:
+
+* Complete 3 productive tasks
+* Finish one study session
+* Complete one workout
+
+Allow players to recover momentum.
+
+---
+
+# Character Room System
+
+Every player owns a personal room.
+
+As progression increases:
+
+* Better desk
+* Better PC setup
+* Better gym equipment
+* Better decorations
+* Better environment
+
+The room visually reflects player growth.
+
+---
+
+# Journal System
+
+Users can log:
+
+* Daily Wins
+* Lessons Learned
+* Mistakes
+* Goals
+* Mood
+* Energy
+* Reflections
+
+Display journal history beautifully.
+
+---
+
+# Statistics Dashboard
+
+Track:
+
+* Total XP
+* Total Coins
+* Total Study Hours
+* Total Reading Hours
+* Total Workout Sessions
+* Total Projects Completed
+* Total Content Created
+* Current Streak
+* Longest Streak
+* Rank History
+* Progress Graphs
+
+---
+
+# Legendary Titles System
+
+Separate from ranks.
+
+Examples:
+
+* Book Slayer
+* Study Titan
+* Iron Warrior
+* Discipline King
+* Creator Pro
+* Coding Beast
+* Consistency Legend
+
+Users can equip titles on their profiles.
+
+---
+
+# Dynamic Environment System
+
+Background changes based on time.
+
+Morning:
+
+* Sunrise visuals
+
+Afternoon:
+
+* Bright futuristic city
+
+Evening:
+
+* Sunset atmosphere
+
+Night:
+
+* Neon cyber city
+
+Creates immersion and realism.
+
+---
+
+# Season System
+
+QPX operates using Seasons.
+
+Season 1:
+
+Rise of Titan
+
+Future seasons can introduce:
+
+* New Challenges
+* New Badges
+* New Cosmetics
+* New Boss Battles
+* New Character Evolutions
+
+---
+
+# Sound Design
+
+Create premium sounds for:
+
+* XP Gain
+* Quest Completion
+* Achievement Unlock
+* Rank Promotion
+* Level Up
+* Boss Victory
+
+All sounds should feel rewarding and motivational.
+
+---
+
+# Performance Requirements
+
+* Android Support
+* iOS Support
+* Smooth 60 FPS Animations
+* Fast Loading
+* Responsive UI
+* Battery Efficient
+
+---
+
+# Final Goal
+
+The user should never feel like they are simply tracking habits.
+
+The user should feel:
+
+"I am building my character."
+
+Every action in real life should strengthen the character inside the game.
+
+The experience must be visually stunning, emotionally rewarding, highly motivating, and capable of keeping users engaged for years while becoming a better version of themselves.
+
+Product Name:
+QPX — Quantum Progress Experience
+
+Season 1:
+Rise of Titan

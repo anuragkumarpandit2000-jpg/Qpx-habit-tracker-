@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "QPX — Quantum Progress Experience"
+version = "1.0.0"
+id = "artifacts/qpx"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 24939
+
+[services.development]
+run = "pnpm --filter @workspace/qpx run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/qpx", "run", "build" ]
+publicDir = "artifacts/qpx/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "24939"
+BASE_PATH = "/"

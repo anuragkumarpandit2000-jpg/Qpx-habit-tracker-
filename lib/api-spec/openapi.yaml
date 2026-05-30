@@ -1,22 +1,39 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: QPX Quantum Progress Experience API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: player
+    description: Player profile and RPG stats
+  - name: quests
+    description: Daily quests management
+  - name: achievements
+    description: Achievement system
+  - name: journal
+    description: Journal entries
+  - name: stats
+    description: Player statistics
+  - name: bossBattles
+    description: Weekly boss battles
+  - name: inventory
+    description: Player inventory and cosmetics
+  - name: dailyLogin
+    description: Daily login reward system
+  - name: seasons
+    description: Season system
+
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,13 +41,996 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  # ── Player ──────────────────────────────────────────────────────────────────
+  /player/profile:
+    get:
+      operationId: getPlayerProfile
+      tags: [player]
+      summary: Get player profile with RPG stats
+      responses:
+        "200":
+          description: Player profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlayerProfile"
+        "404":
+          description: No profile found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    patch:
+      operationId: updatePlayerProfile
+      tags: [player]
+      summary: Update player profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PlayerProfileUpdate"
+      responses:
+        "200":
+          description: Updated profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlayerProfile"
+
+  /player/onboarding:
+    post:
+      operationId: completeOnboarding
+      tags: [player]
+      summary: Complete onboarding questionnaire and create player
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OnboardingInput"
+      responses:
+        "201":
+          description: Player created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlayerProfile"
+
+  /player/xp:
+    post:
+      operationId: awardXp
+      tags: [player]
+      summary: Award XP to player
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/XpAwardInput"
+      responses:
+        "200":
+          description: Updated player with XP result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/XpAwardResult"
+
+  # ── Quests ──────────────────────────────────────────────────────────────────
+  /quests:
+    get:
+      operationId: getQuests
+      tags: [quests]
+      summary: List all quests for today
+      parameters:
+        - name: date
+          in: query
+          schema:
+            type: string
+          description: Date in YYYY-MM-DD format, defaults to today
+      responses:
+        "200":
+          description: List of quests
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Quest"
+    post:
+      operationId: createQuest
+      tags: [quests]
+      summary: Create a new quest
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/QuestInput"
+      responses:
+        "201":
+          description: Created quest
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Quest"
+
+  /quests/{id}:
+    patch:
+      operationId: updateQuest
+      tags: [quests]
+      summary: Update a quest
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/QuestUpdate"
+      responses:
+        "200":
+          description: Updated quest
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Quest"
+    delete:
+      operationId: deleteQuest
+      tags: [quests]
+      summary: Delete a quest
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /quests/{id}/complete:
+    post:
+      operationId: completeQuest
+      tags: [quests]
+      summary: Mark a quest as complete and award XP
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Quest completed with XP result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QuestCompleteResult"
+
+  # ── Achievements ─────────────────────────────────────────────────────────────
+  /achievements:
+    get:
+      operationId: getAchievements
+      tags: [achievements]
+      summary: List all achievements with unlock status
+      responses:
+        "200":
+          description: List of achievements
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Achievement"
+
+  /achievements/recent:
+    get:
+      operationId: getRecentAchievements
+      tags: [achievements]
+      summary: Get recently unlocked achievements
+      responses:
+        "200":
+          description: Recent achievements
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Achievement"
+
+  # ── Journal ──────────────────────────────────────────────────────────────────
+  /journal:
+    get:
+      operationId: getJournalEntries
+      tags: [journal]
+      summary: List journal entries
+      responses:
+        "200":
+          description: Journal entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/JournalEntry"
+    post:
+      operationId: createJournalEntry
+      tags: [journal]
+      summary: Create a journal entry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/JournalEntryInput"
+      responses:
+        "201":
+          description: Created journal entry
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JournalEntry"
+
+  /journal/{id}:
+    get:
+      operationId: getJournalEntry
+      tags: [journal]
+      summary: Get a journal entry
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Journal entry
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JournalEntry"
+    patch:
+      operationId: updateJournalEntry
+      tags: [journal]
+      summary: Update a journal entry
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/JournalEntryUpdate"
+      responses:
+        "200":
+          description: Updated journal entry
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JournalEntry"
+    delete:
+      operationId: deleteJournalEntry
+      tags: [journal]
+      summary: Delete a journal entry
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  # ── Stats ────────────────────────────────────────────────────────────────────
+  /stats:
+    get:
+      operationId: getPlayerStats
+      tags: [stats]
+      summary: Get comprehensive player statistics
+      responses:
+        "200":
+          description: Player stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlayerStats"
+
+  /stats/progress-history:
+    get:
+      operationId: getProgressHistory
+      tags: [stats]
+      summary: Get XP progress history for charts
+      parameters:
+        - name: days
+          in: query
+          schema:
+            type: integer
+          description: Number of days of history (default 30)
+      responses:
+        "200":
+          description: Progress history data points
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ProgressDataPoint"
+
+  # ── Boss Battles ─────────────────────────────────────────────────────────────
+  /boss-battles:
+    get:
+      operationId: getBossBattles
+      tags: [bossBattles]
+      summary: List all boss battles
+      responses:
+        "200":
+          description: Boss battles
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/BossBattle"
+
+  /boss-battles/{id}/progress:
+    patch:
+      operationId: updateBossBattleProgress
+      tags: [bossBattles]
+      summary: Update progress on a boss battle
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BossBattleProgressInput"
+      responses:
+        "200":
+          description: Updated boss battle
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BossBattle"
+
+  # ── Inventory ────────────────────────────────────────────────────────────────
+  /inventory:
+    get:
+      operationId: getInventory
+      tags: [inventory]
+      summary: Get player inventory and available cosmetics
+      responses:
+        "200":
+          description: Player inventory
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Inventory"
+
+  /inventory/{itemId}/equip:
+    post:
+      operationId: equipItem
+      tags: [inventory]
+      summary: Equip a cosmetic item
+      parameters:
+        - name: itemId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Updated inventory
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Inventory"
+
+  # ── Daily Login ──────────────────────────────────────────────────────────────
+  /daily-login:
+    post:
+      operationId: claimDailyLogin
+      tags: [dailyLogin]
+      summary: Claim daily login reward
+      responses:
+        "200":
+          description: Daily login result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DailyLoginResult"
+
+  /daily-login/calendar:
+    get:
+      operationId: getDailyLoginCalendar
+      tags: [dailyLogin]
+      summary: Get daily login reward calendar and history
+      responses:
+        "200":
+          description: Login calendar
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DailyLoginCalendar"
+
+  # ── Seasons ──────────────────────────────────────────────────────────────────
+  /seasons/current:
+    get:
+      operationId: getCurrentSeason
+      tags: [seasons]
+      summary: Get current active season
+      responses:
+        "200":
+          description: Current season
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Season"
+
 components:
   schemas:
     HealthStatus:
       type: object
+      required: [status]
       properties:
         status:
           type: string
-      required:
-        - status
 
+    ErrorResponse:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string
+
+    # ── Player ─────────────────────────────────────────────────────────────────
+    PlayerProfile:
+      type: object
+      required: [id, username, playerId, level, xp, xpToNextLevel, hp, maxHp, coins, streak, rank, rankIndex, totalXp, onboardingComplete, createdAt]
+      properties:
+        id:
+          type: integer
+        username:
+          type: string
+        playerId:
+          type: string
+          description: Unique display ID like QPX-1042
+        avatarUrl:
+          type: ["string", "null"]
+        level:
+          type: integer
+        xp:
+          type: integer
+          description: Current XP in this level
+        xpToNextLevel:
+          type: integer
+        totalXp:
+          type: integer
+        hp:
+          type: integer
+        maxHp:
+          type: integer
+        coins:
+          type: integer
+        streak:
+          type: integer
+          description: Current daily streak in days
+        longestStreak:
+          type: integer
+        rank:
+          type: string
+          description: "Current rank name: Recruit, Cadet, Trainee, Warrior..."
+        rankIndex:
+          type: integer
+          description: 0-based rank index (0=Recruit ... 9=Titan)
+        title:
+          type: ["string", "null"]
+          description: Equipped legendary title
+        onboardingComplete:
+          type: boolean
+        primaryGoal:
+          type: ["string", "null"]
+        bio:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    PlayerProfileUpdate:
+      type: object
+      properties:
+        username:
+          type: string
+        avatarUrl:
+          type: string
+        bio:
+          type: string
+        title:
+          type: string
+
+    OnboardingInput:
+      type: object
+      required: [username, age, height, weight, primaryGoal, topPriorities, skillsToLearn, dailyHours, biggestWeakness, habitsToBuild, desiredIdentity]
+      properties:
+        username:
+          type: string
+        age:
+          type: integer
+        height:
+          type: string
+        weight:
+          type: string
+        primaryGoal:
+          type: string
+        topPriorities:
+          type: array
+          items:
+            type: string
+        skillsToLearn:
+          type: array
+          items:
+            type: string
+        dailyHours:
+          type: number
+        biggestWeakness:
+          type: string
+        habitsToLearn:
+          type: array
+          items:
+            type: string
+        habitsToLearn_extra:
+          type: ["string", "null"]
+          description: unused - keep for compat
+        habitsToBuild:
+          type: array
+          items:
+            type: string
+        desiredIdentity:
+          type: string
+
+    XpAwardInput:
+      type: object
+      required: [amount, reason]
+      properties:
+        amount:
+          type: integer
+        reason:
+          type: string
+
+    XpAwardResult:
+      type: object
+      required: [player, xpGained, leveledUp, newLevel, newRank, rankPromoted]
+      properties:
+        player:
+          $ref: "#/components/schemas/PlayerProfile"
+        xpGained:
+          type: integer
+        leveledUp:
+          type: boolean
+        newLevel:
+          type: integer
+        newRank:
+          type: string
+        rankPromoted:
+          type: boolean
+
+    # ── Quests ─────────────────────────────────────────────────────────────────
+    Quest:
+      type: object
+      required: [id, title, category, xpReward, coinReward, completed, date, createdAt]
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        description:
+          type: ["string", "null"]
+        category:
+          type: string
+          description: "mind | body | knowledge | creation | discipline | health | productivity"
+        xpReward:
+          type: integer
+        coinReward:
+          type: integer
+        hpPenalty:
+          type: integer
+          description: HP lost if quest is missed
+        completed:
+          type: boolean
+        completedAt:
+          type: ["string", "null"]
+        date:
+          type: string
+          description: YYYY-MM-DD date this quest belongs to
+        createdAt:
+          type: string
+
+    QuestInput:
+      type: object
+      required: [title, category, xpReward]
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        category:
+          type: string
+        xpReward:
+          type: integer
+        coinReward:
+          type: integer
+        hpPenalty:
+          type: integer
+        date:
+          type: string
+
+    QuestUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        category:
+          type: string
+        xpReward:
+          type: integer
+        coinReward:
+          type: integer
+        hpPenalty:
+          type: integer
+
+    QuestCompleteResult:
+      type: object
+      required: [quest, player, xpGained, coinsGained, leveledUp, rankPromoted]
+      properties:
+        quest:
+          $ref: "#/components/schemas/Quest"
+        player:
+          $ref: "#/components/schemas/PlayerProfile"
+        xpGained:
+          type: integer
+        coinsGained:
+          type: integer
+        leveledUp:
+          type: boolean
+        rankPromoted:
+          type: boolean
+        newAchievements:
+          type: array
+          items:
+            $ref: "#/components/schemas/Achievement"
+
+    # ── Achievements ───────────────────────────────────────────────────────────
+    Achievement:
+      type: object
+      required: [id, title, description, category, xpReward, coinReward, unlocked, rarity]
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        category:
+          type: string
+        icon:
+          type: ["string", "null"]
+        xpReward:
+          type: integer
+        coinReward:
+          type: integer
+        unlocked:
+          type: boolean
+        unlockedAt:
+          type: ["string", "null"]
+        rarity:
+          type: string
+          description: "common | rare | epic | legendary"
+        progress:
+          type: ["integer", "null"]
+        target:
+          type: ["integer", "null"]
+
+    # ── Journal ────────────────────────────────────────────────────────────────
+    JournalEntry:
+      type: object
+      required: [id, title, content, mood, energyLevel, createdAt]
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        content:
+          type: string
+        wins:
+          type: ["string", "null"]
+        lessons:
+          type: ["string", "null"]
+        goals:
+          type: ["string", "null"]
+        mood:
+          type: string
+          description: "excellent | good | neutral | low | terrible"
+        energyLevel:
+          type: integer
+          description: 1-10
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+
+    JournalEntryInput:
+      type: object
+      required: [title, content, mood, energyLevel]
+      properties:
+        title:
+          type: string
+        content:
+          type: string
+        wins:
+          type: string
+        lessons:
+          type: string
+        goals:
+          type: string
+        mood:
+          type: string
+        energyLevel:
+          type: integer
+
+    JournalEntryUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+        content:
+          type: string
+        wins:
+          type: string
+        lessons:
+          type: string
+        goals:
+          type: string
+        mood:
+          type: string
+        energyLevel:
+          type: integer
+
+    # ── Stats ──────────────────────────────────────────────────────────────────
+    PlayerStats:
+      type: object
+      required: [totalXp, totalCoins, totalQuestsCompleted, currentStreak, longestStreak, totalJournalEntries, totalAchievementsUnlocked, questsByCategory, xpByCategory, rankHistory]
+      properties:
+        totalXp:
+          type: integer
+        totalCoins:
+          type: integer
+        totalQuestsCompleted:
+          type: integer
+        currentStreak:
+          type: integer
+        longestStreak:
+          type: integer
+        totalJournalEntries:
+          type: integer
+        totalAchievementsUnlocked:
+          type: integer
+        questsByCategory:
+          type: array
+          items:
+            $ref: "#/components/schemas/CategoryStat"
+        xpByCategory:
+          type: array
+          items:
+            $ref: "#/components/schemas/CategoryStat"
+        rankHistory:
+          type: array
+          items:
+            $ref: "#/components/schemas/RankHistoryEntry"
+
+    CategoryStat:
+      type: object
+      required: [category, count]
+      properties:
+        category:
+          type: string
+        count:
+          type: integer
+        xp:
+          type: ["integer", "null"]
+
+    RankHistoryEntry:
+      type: object
+      required: [rank, achievedAt]
+      properties:
+        rank:
+          type: string
+        achievedAt:
+          type: string
+
+    ProgressDataPoint:
+      type: object
+      required: [date, xp, level]
+      properties:
+        date:
+          type: string
+        xp:
+          type: integer
+        level:
+          type: integer
+        questsCompleted:
+          type: integer
+
+    # ── Boss Battles ───────────────────────────────────────────────────────────
+    BossBattle:
+      type: object
+      required: [id, title, description, targetValue, currentProgress, xpReward, coinReward, status, expiresAt, createdAt]
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        category:
+          type: string
+        targetValue:
+          type: integer
+        currentProgress:
+          type: integer
+        xpReward:
+          type: integer
+        coinReward:
+          type: integer
+        badgeReward:
+          type: ["string", "null"]
+        status:
+          type: string
+          description: "active | completed | failed | upcoming"
+        expiresAt:
+          type: string
+        completedAt:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    BossBattleProgressInput:
+      type: object
+      required: [increment]
+      properties:
+        increment:
+          type: integer
+
+    # ── Inventory ──────────────────────────────────────────────────────────────
+    Inventory:
+      type: object
+      required: [items, equippedOutfit, equippedEffect, equippedFrame]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/InventoryItem"
+        equippedOutfit:
+          type: ["string", "null"]
+        equippedEffect:
+          type: ["string", "null"]
+        equippedFrame:
+          type: ["string", "null"]
+
+    InventoryItem:
+      type: object
+      required: [id, name, type, rarity, unlocked, equipped]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: ["string", "null"]
+        type:
+          type: string
+          description: "outfit | effect | frame | badge | title"
+        rarity:
+          type: string
+          description: "common | rare | epic | legendary"
+        unlocked:
+          type: boolean
+        equipped:
+          type: boolean
+        requiredRank:
+          type: ["string", "null"]
+        requiredLevel:
+          type: ["integer", "null"]
+
+    # ── Daily Login ────────────────────────────────────────────────────────────
+    DailyLoginResult:
+      type: object
+      required: [alreadyClaimed, reward, streakDay, player]
+      properties:
+        alreadyClaimed:
+          type: boolean
+        reward:
+          $ref: "#/components/schemas/LoginReward"
+        streakDay:
+          type: integer
+        player:
+          $ref: "#/components/schemas/PlayerProfile"
+
+    LoginReward:
+      type: object
+      required: [type, amount, label]
+      properties:
+        type:
+          type: string
+          description: "coins | xp | badge_fragment | special | rare"
+        amount:
+          type: integer
+        label:
+          type: string
+
+    DailyLoginCalendar:
+      type: object
+      required: [rewards, claimedDays, currentStreak]
+      properties:
+        rewards:
+          type: array
+          items:
+            $ref: "#/components/schemas/CalendarDay"
+        claimedDays:
+          type: array
+          items:
+            type: integer
+        currentStreak:
+          type: integer
+
+    CalendarDay:
+      type: object
+      required: [day, reward]
+      properties:
+        day:
+          type: integer
+        reward:
+          $ref: "#/components/schemas/LoginReward"
+        claimed:
+          type: boolean
+        special:
+          type: boolean
+
+    # ── Seasons ────────────────────────────────────────────────────────────────
+    Season:
+      type: object
+      required: [id, name, subtitle, startDate, endDate, active]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        subtitle:
+          type: string
+        startDate:
+          type: string
+        endDate:
+          type: string
+        active:
+          type: boolean
+        description:
+          type: ["string", "null"]
+        rewards:
+          type: array
+          items:
+            type: string

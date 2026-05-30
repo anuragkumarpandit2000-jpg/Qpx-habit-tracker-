@@ -1,0 +1,1 @@
+- [QPX hook patterns](qpx-hook-patterns.md) — useClaimDailyLogin takes void; query hooks use double-Get prefix (getGetXxxQueryKey); no useGet* exports via `export const` (they use `export function`)
