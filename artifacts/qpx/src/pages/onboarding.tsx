@@ -264,23 +264,27 @@ export default function Onboarding() {
 
   const handleNext = async () => {
     if (isLast) {
-      await completeOnboarding.mutateAsync({
-        data: {
-          username: form.username,
-          age: form.age,
-          height: form.height,
-          weight: form.weight,
-          primaryGoal: form.primaryGoal,
-          topPriorities: form.topPriorities,
-          skillsToLearn: form.skillsToLearn,
-          dailyHours: form.dailyHours,
-          biggestWeakness: form.biggestWeakness,
-          habitsToBuild: form.habitsToBuild,
-          desiredIdentity: form.desiredIdentity,
-        },
-      });
-      queryClient.invalidateQueries({ queryKey: getGetPlayerProfileQueryKey() });
-      navigate("/dashboard");
+      try {
+        await completeOnboarding.mutateAsync({
+          data: {
+            username: form.username,
+            age: form.age,
+            height: form.height,
+            weight: form.weight,
+            primaryGoal: form.primaryGoal,
+            topPriorities: form.topPriorities,
+            skillsToLearn: form.skillsToLearn,
+            dailyHours: form.dailyHours,
+            biggestWeakness: form.biggestWeakness,
+            habitsToBuild: form.habitsToBuild,
+            desiredIdentity: form.desiredIdentity,
+          },
+        });
+        queryClient.invalidateQueries({ queryKey: getGetPlayerProfileQueryKey() });
+        navigate("/dashboard");
+      } catch (err) {
+        console.error("Onboarding failed:", err);
+      }
     } else {
       setStep(step + 1);
     }
