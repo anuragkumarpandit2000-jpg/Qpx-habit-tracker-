@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLocation } from "wouter";
 import { useGetPlayerProfile, useCompleteOnboarding } from "@workspace/api-client-react";
@@ -34,8 +34,13 @@ export default function Onboarding() {
     desiredIdentity: "",
   });
 
+  useEffect(() => {
+    if (!isLoading && player?.onboardingComplete) {
+      navigate("/dashboard");
+    }
+  }, [isLoading, player?.onboardingComplete]);
+
   if (!isLoading && player?.onboardingComplete) {
-    navigate("/dashboard");
     return null;
   }
 

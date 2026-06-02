@@ -18,7 +18,21 @@ import Settings from "@/pages/settings";
 
 import { Layout } from "@/components/layout";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: (failureCount, error: unknown) => {
+        const status = (error as { status?: number })?.status;
+        if (status === 404 || status === 401 || status === 403) return false;
+        return failureCount < 2;
+      },
+      throwOnError: false,
+    },
+    mutations: {
+      throwOnError: false,
+    },
+  },
+});
 
 function Router() {
   return (
