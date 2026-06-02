@@ -61,8 +61,7 @@ router.get("/player/profile", async (req, res): Promise<void> => {
     res.status(200).json(null);
     return;
   }
-  const parsed = GetPlayerProfileResponse.safeParse(formatPlayer(player));
-  res.json(parsed.success ? parsed.data : formatPlayer(player));
+  res.json(formatPlayer(player));
 });
 
 router.patch("/player/profile", async (req, res): Promise<void> => {

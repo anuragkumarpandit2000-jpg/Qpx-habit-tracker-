@@ -91,8 +91,13 @@ export default function Dashboard() {
   };
 
   const handleClaimLogin = async () => {
-    await claimDailyLogin.mutateAsync();
-    queryClient.invalidateQueries({ queryKey: getGetPlayerProfileQueryKey() });
+    try {
+      await claimDailyLogin.mutateAsync();
+      setLoginClaimed(true);
+      queryClient.invalidateQueries({ queryKey: getGetPlayerProfileQueryKey() });
+    } catch {
+      // silently ignore
+    }
   };
 
   if (playerLoading) {
@@ -267,18 +272,29 @@ export default function Dashboard() {
             </div>
             <div>
               <div className="text-sm font-semibold text-white">Daily Login Reward</div>
-              <div className="text-xs text-muted-foreground">Day {player.loginStreakDay + 1} reward available</div>
+              <div className="text-xs text-muted-foreground">
+                {loginClaimed
+                  ? `Day ${(player.loginStreakDay ?? 0)} claimed ✓`
+                  : `Day ${(player.loginStreakDay ?? 0) + 1} reward available`}
+              </div>
             </div>
           </div>
-          <Button
-            size="sm"
-            onClick={handleClaimLogin}
-            disabled={claimDailyLogin.isPending}
-            className="text-black font-bold text-xs"
-            style={{ background: "linear-gradient(90deg, #ffd700, #ff8c00)" }}
-          >
-            Claim
-          </Button>
+          {loginClaimed ? (
+            <div className="text-xs font-bold px-3 py-1.5 rounded-lg text-black"
+              style={{ background: "linear-gradient(90deg, #ffd700, #ff8c00)", opacity: 0.6 }}>
+              Claimed ✓
+            </div>
+          ) : (
+            <Button
+              size="sm"
+              onClick={handleClaimLogin}
+              disabled={claimDailyLogin.isPending}
+              className="text-black font-bold text-xs"
+              style={{ background: "linear-gradient(90deg, #ffd700, #ff8c00)" }}
+            >
+              {claimDailyLogin.isPending ? "Claiming..." : "Claim"}
+            </Button>
+          )}
         </motion.div>
 
         {/* Today's quests */}
