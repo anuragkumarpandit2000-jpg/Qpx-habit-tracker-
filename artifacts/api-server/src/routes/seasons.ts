@@ -34,7 +34,7 @@ router.get("/seasons/current", async (req, res): Promise<void> => {
     .limit(1);
 
   if (!season) {
-    res.status(404).json({ error: "No active season" });
+    res.status(200).json(null);
     return;
   }
 

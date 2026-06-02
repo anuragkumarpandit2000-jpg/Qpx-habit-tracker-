@@ -20,7 +20,7 @@ router.post("/daily-login", async (req, res): Promise<void> => {
   const today = new Date().toISOString().split("T")[0];
   const player = await getOrCreatePlayer();
   if (!player) {
-    res.status(404).json({ error: "No player found" });
+    res.status(200).json({ alreadyClaimed: true, skipped: true });
     return;
   }
 
