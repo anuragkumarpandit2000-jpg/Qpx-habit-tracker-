@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLocation } from "wouter";
 import {
@@ -47,6 +47,9 @@ export default function Dashboard() {
   const [xpAmount, setXpAmount] = useState(0);
   const [showLevelUp, setShowLevelUp] = useState(false);
   const [newLevel, setNewLevel] = useState(1);
+  const [loginClaimed, setLoginClaimed] = useState(false);
+  const [claimToast, setClaimToast] = useState<string | null>(null);
+  const autoClaimFired = useRef(false);
 
   const { data: player, isLoading: playerLoading } = useGetPlayerProfile();
   const { data: quests = [] } = useGetQuests();
@@ -56,6 +59,20 @@ export default function Dashboard() {
   const claimDailyLogin = useClaimDailyLogin();
 
   const timeOfDay = getTimeOfDay();
+
+  // Auto-claim daily login on every entry
+  useEffect(() => {
+    if (autoClaimFired.current || playerLoading || !player) return;
+    autoClaimFired.current = true;
+    claimDailyLogin.mutateAsync().then((res) => {
+      queryClient.invalidateQueries({ queryKey: getGetPlayerProfileQueryKey() });
+      setLoginClaimed(true);
+      if (!res.alreadyClaimed) {
+        setClaimToast(`+${res.reward.amount} ${res.reward.type === "coins" ? "Coins" : "XP"} — Day ${res.streakDay} reward!`);
+        setTimeout(() => setClaimToast(null), 3500);
+      }
+    }).catch(() => {});
+  }, [player, playerLoading]);
 
   const handleCompleteQuest = async (questId: number) => {
     const result = await completeQuest.mutateAsync({ id: questId });
@@ -104,6 +121,22 @@ export default function Dashboard() {
     <div className="min-h-screen" style={{ background: timeOfDay.gradient }}>
       <XpFloat amount={xpAmount} visible={showXp} onComplete={() => setShowXp(false)} />
       <LevelUpBanner visible={showLevelUp} level={newLevel} onComplete={() => setShowLevelUp(false)} />
+
+      {/* Auto-claim toast */}
+      <AnimatePresence>
+        {claimToast && (
+          <motion.div
+            initial={{ opacity: 0, y: -40, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -20, scale: 0.9 }}
+            className="fixed top-4 left-1/2 z-50 -translate-x-1/2 flex items-center gap-2 px-4 py-2.5 rounded-2xl text-sm font-bold text-black"
+            style={{ background: "linear-gradient(90deg, #ffd700, #ff8c00)", boxShadow: "0 4px 24px #ffd70080" }}
+          >
+            <Coins className="w-4 h-4" />
+            {claimToast}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <div className="max-w-2xl mx-auto px-4 py-6 space-y-5">
         {/* Season banner */}
