@@ -58,7 +58,7 @@ function formatPlayer(p: typeof playersTable.$inferSelect) {
 router.get("/player/profile", async (req, res): Promise<void> => {
   const player = await getOrCreatePlayer();
   if (!player) {
-    res.status(404).json({ error: "No player profile found" });
+    res.status(200).json(null);
     return;
   }
   const parsed = GetPlayerProfileResponse.safeParse(formatPlayer(player));

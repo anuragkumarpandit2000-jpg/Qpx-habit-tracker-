@@ -1,1 +1,2 @@
 - [QPX hook patterns](qpx-hook-patterns.md) — useClaimDailyLogin takes void; query hooks use double-Get prefix (getGetXxxQueryKey); no useGet* exports via `export const` (they use `export function`)
+- [QPX player profile null pattern](qpx-player-null.md) — GET /player/profile returns 200+null (not 404) when no player exists; Vite overlay intercepts 404s even with throwOnError:false
