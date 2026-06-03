@@ -1,0 +1,207 @@
+🚀 1. Programming & Software Development
+🌱 Beginner
+Computer Basics
+Typing Speed
+Internet Basics
+Git & GitHub
+VS Code
+🌿 Web Development
+HTML
+CSS
+Responsive Design
+JavaScript
+DOM Manipulation
+APIs
+Local Storage
+🌳 Frontend
+React
+Next.js
+Tailwind CSS
+UI/UX Basics
+🌲 Backend
+Node.js
+Express.js
+Authentication
+REST APIs
+Databases
+🗄️ Databases
+SQL
+MySQL
+PostgreSQL
+MongoDB
+💻 Programming Languages
+JavaScript
+Python
+C
+C++
+Java
+TypeScript
+📱 App Development
+React Native
+Flutter
+Android Studio
+☁️ Deployment
+Vercel
+Netlify
+Linux Basics
+Docker
+🤖 2. AI & Artificial Intelligence
+Foundation
+AI Basics
+Machine Learning Basics
+Deep Learning Basics
+Python for AI
+NumPy
+Pandas
+Matplotlib
+AI Tools
+ChatGPT APIs
+AI Agents
+Voice Assistants
+Prompt Engineering
+Advanced
+Computer Vision
+NLP
+LLM Development
+RAG Systems
+🛡️ 3. Cybersecurity / Ethical Hacking
+Basics
+Networking
+IP Address
+DNS
+HTTP/HTTPS
+Security
+Linux
+Kali Linux
+Web Security
+OWASP
+Ethical Hacking
+Vulnerability Assessment
+Penetration Testing
+Wireshark
+Burp Suite
+Advanced
+Reverse Engineering
+Malware Analysis
+Digital Forensics
+🤖 4. Robotics & Hardware
+Electronics
+Current
+Voltage
+Circuits
+Components
+Microcontrollers
+Arduino
+ESP32
+Raspberry Pi
+Robotics
+Sensors
+Motors
+Automation
+Advanced
+AI Robots
+Computer Vision Robots
+Humanoid Robotics
+🥽 5. AR / VR / Hologram Technology
+Basics
+AR Concepts
+VR Concepts
+Development
+Unity
+C#
+Advanced
+Gesture Control
+Holographic Interfaces
+Smart Glasses
+Your Dream Projects
+Parker AI
+Holographic Band
+AR Human Assistant
+🎨 6. Design Skills
+Graphics
+Canva
+Photoshop
+UI/UX
+Figma
+Wireframing
+Prototyping
+3D Design
+Blender
+3D Printing Design
+🎥 7. Content Creation
+Video Editing
+CapCut
+DaVinci Resolve
+Content Skills
+Storytelling
+Hook Creation
+Script Writing
+Social Media
+YouTube
+Instagram
+Shorts Strategy
+🗣️ 8. Communication Skills
+English
+Vocabulary
+Grammar
+Speaking
+Public Speaking
+Confidence
+Presentation
+Writing
+Professional Writing
+Copywriting
+💰 9. Business & Entrepreneurship
+Basics
+Business Models
+Startup Basics
+Online Business
+Freelancing
+SaaS
+Digital Products
+Growth
+Marketing
+Sales
+Branding
+📈 10. Productivity & Self-Improvement
+Discipline
+Habit Building
+Time Management
+Focus
+Deep Work
+Meditation
+Personal Growth
+Goal Setting
+Decision Making
+📚 11. Academic Mastery (Your IIT Path)
+Class 10
+Maths
+Science
+SST
+English
+Hindi
+IIT Foundation
+Algebra
+Geometry
+Trigonometry
+Physics Concepts
+Future
+JEE Maths
+JEE Physics
+JEE Chemistry
+⚡ 12. Special Skills for Your Future Vision
+Parker AI Assistant
+Voice AI
+Avatar AI
+Memory Systems
+AI Agents
+Holographic Band
+Electronics
+AI
+AR Interface
+Gesture Recognition
+AR Human Project
+Character Design
+Lip Sync
+Speech Synthesis
+Real-Time AI
