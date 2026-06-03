@@ -2,7 +2,7 @@ import { Suspense, lazy, useMemo } from "react";
 import { motion } from "framer-motion";
 import { useGetPlayerProfile, useGetInventory } from "@workspace/api-client-react";
 import { RankBadge, RANKS, RANK_COLORS } from "@/components/rank-badge";
-import { Shield, ChevronRight, Lock, Coins, Zap, Flame } from "lucide-react";
+import { Shield, ChevronRight, Lock, Coins, Zap, Flame, CheckCircle2, Circle } from "lucide-react";
 import CharacterFallback from "@/components/character-3d-fallback";
 
 const CharacterScene3D = lazy(() => import("@/components/character-3d-scene"));
@@ -15,6 +15,7 @@ function checkWebGL(): boolean {
 }
 
 const RANK_DESCRIPTIONS = [
+  "A civilian — not yet begun the journey. The potential to become great lies dormant.",
   "A new warrior begins their journey. Raw, untested, full of potential.",
   "Training begins in earnest. The discipline of a cadet forges the mind.",
   "Combat drills shape the body. The trainee proves their commitment.",
@@ -25,6 +26,19 @@ const RANK_DESCRIPTIONS = [
   "Mastery of self and craft. The master teaches through example.",
   "Grandmaster — transcends normal limits. A force of nature.",
   "TITAN — the apex of human potential. Unstoppable. Eternal. Legendary.",
+];
+
+const LEVEL_CONDITIONS = [
+  { xp: 100,  skills: 1,  chapters: 1  },
+  { xp: 200,  skills: 3,  chapters: 2  },
+  { xp: 350,  skills: 6,  chapters: 4  },
+  { xp: 550,  skills: 10, chapters: 6  },
+  { xp: 800,  skills: 15, chapters: 9  },
+  { xp: 1100, skills: 21, chapters: 13 },
+  { xp: 1500, skills: 28, chapters: 18 },
+  { xp: 2000, skills: 36, chapters: 24 },
+  { xp: 2600, skills: 45, chapters: 31 },
+  { xp: 3300, skills: 55, chapters: 40 },
 ];
 
 export default function Character() {
@@ -228,6 +242,128 @@ export default function Character() {
             );
           })}
         </div>
+      </motion.div>
+
+      {/* ── LEVEL-UP RULES ── */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3 }}
+        className="glass-panel rounded-2xl p-5 pb-6"
+      >
+        <h2 className="font-bold text-white mb-1">Level-Up Rules</h2>
+        <p className="text-xs text-muted-foreground mb-4">
+          Each level requires XP <em>and</em> learned skills <em>and</em> completed chapters. XP alone won't level you up.
+        </p>
+
+        {/* ── Next level progress ── */}
+        {player.level < LEVEL_CONDITIONS.length && (() => {
+          const cond = LEVEL_CONDITIONS[player.level];
+          const nextRankColor = RANK_COLORS[Math.min(player.level + 1, RANK_COLORS.length - 1)];
+          const skillsDone  = (player as any).skillsLearned ?? 0;
+          const chapsDone   = (player as any).chaptersCompleted ?? 0;
+          const xpReady     = player.xp >= cond.xp;
+          const skillsReady = skillsDone >= cond.skills;
+          const chapsReady  = chapsDone >= cond.chapters;
+          const allReady    = xpReady && skillsReady && chapsReady;
+          return (
+            <div
+              className="rounded-xl p-3.5 mb-4 space-y-3"
+              style={{ background: `${nextRankColor.from}0d`, border: `1px solid ${nextRankColor.from}25` }}
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-white">
+                  Next: {RANKS[Math.min(player.level + 1, RANKS.length - 1)]} (Level {player.level + 1})
+                </span>
+                {allReady && (
+                  <span className="text-[10px] font-black px-2 py-0.5 rounded-full animate-pulse"
+                    style={{ background: `${nextRankColor.from}30`, color: nextRankColor.from }}>
+                    ⚡ READY!
+                  </span>
+                )}
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                {[
+                  { label: "XP", value: `${Math.min(player.xp, cond.xp)}/${cond.xp}`, ready: xpReady, icon: Zap },
+                  { label: "Skills", value: `${skillsDone}/${cond.skills}`, ready: skillsReady, icon: CheckCircle2 },
+                  { label: "Chapters", value: `${chapsDone}/${cond.chapters}`, ready: chapsReady, icon: CheckCircle2 },
+                ].map(({ label, value, ready, icon: Icon }) => (
+                  <div key={label} className="text-center p-2.5 rounded-xl"
+                    style={{ background: ready ? `${nextRankColor.from}15` : "#ffffff08" }}>
+                    {ready
+                      ? <CheckCircle2 className="w-3.5 h-3.5 mx-auto mb-1" style={{ color: nextRankColor.from }} />
+                      : <Circle className="w-3.5 h-3.5 mx-auto mb-1 text-muted-foreground/40" />}
+                    <div className={`text-xs font-bold ${ready ? "text-white" : "text-muted-foreground"}`}>{value}</div>
+                    <div className="text-[9px] text-muted-foreground">{label}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        })()}
+
+        {/* ── Full requirements table ── */}
+        <div className="space-y-1.5">
+          <div className="grid grid-cols-4 gap-1 px-2 pb-1">
+            {["Level", "XP Needed", "Skills", "Chapters"].map((h) => (
+              <div key={h} className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest text-center">{h}</div>
+            ))}
+          </div>
+          {LEVEL_CONDITIONS.map((cond, i) => {
+            const fromColors = RANK_COLORS[i];
+            const toColors   = RANK_COLORS[Math.min(i + 1, RANK_COLORS.length - 1)];
+            const isDone     = i < player.level;
+            const isCurrent  = i === player.level;
+            return (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, x: -8 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: i * 0.03 }}
+                className="grid grid-cols-4 gap-1 items-center px-2 py-1.5 rounded-xl text-center"
+                style={
+                  isCurrent
+                    ? { background: `${fromColors.from}12`, border: `1px solid ${fromColors.from}30` }
+                    : isDone
+                    ? { background: "#ffffff05" }
+                    : {}
+                }
+              >
+                <div className="flex items-center gap-1.5">
+                  <div className="w-2 h-2 rounded-full flex-shrink-0"
+                    style={{ background: isDone ? fromColors.from : isCurrent ? fromColors.from : "#ffffff20" }} />
+                  <span className={`text-[10px] font-bold ${isDone ? "text-white" : isCurrent ? "text-white" : "text-muted-foreground"}`}>
+                    {i} → {i + 1}
+                  </span>
+                </div>
+                <div className={`text-[10px] font-semibold ${isDone ? "text-muted-foreground line-through" : isCurrent ? "text-white" : "text-muted-foreground"}`}>
+                  {cond.xp}
+                </div>
+                <div className={`text-[10px] font-semibold ${isDone ? "text-muted-foreground line-through" : isCurrent ? "text-white" : "text-muted-foreground"}`}>
+                  {cond.skills}
+                </div>
+                <div className={`text-[10px] font-semibold ${isDone ? "text-muted-foreground line-through" : isCurrent ? "text-white" : "text-muted-foreground"}`}>
+                  {cond.chapters}
+                </div>
+              </motion.div>
+            );
+          })}
+        </div>
+
+        {/* ── XP rewards legend ── */}
+        <div className="mt-4 pt-3 border-t border-border/20 grid grid-cols-3 gap-2 text-center">
+          {[
+            { label: "Beginner Skill", xp: 5, color: "#22c55e" },
+            { label: "Intermediate Skill", xp: 10, color: "#3b82f6" },
+            { label: "Advanced Skill", xp: 20, color: "#a855f7" },
+          ].map(({ label, xp, color }) => (
+            <div key={label} className="p-2 rounded-xl" style={{ background: `${color}10` }}>
+              <div className="text-xs font-black" style={{ color }}>+{xp} XP</div>
+              <div className="text-[9px] text-muted-foreground mt-0.5">{label}</div>
+            </div>
+          ))}
+        </div>
+        <div className="mt-2 text-center text-[9px] text-muted-foreground">Chapter completion awards +8 XP</div>
       </motion.div>
     </div>
   );

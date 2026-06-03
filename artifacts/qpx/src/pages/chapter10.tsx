@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { getGetPlayerProfileQueryKey } from "@workspace/api-client-react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   CheckCircle2, Circle, ChevronDown, ChevronRight,
@@ -304,7 +306,17 @@ export default function Chapter10() {
   useEffect(() => { localStorage.setItem(STORAGE_TICKS, JSON.stringify(ticked)); }, [ticked]);
   useEffect(() => { localStorage.setItem(STORAGE_DATES, JSON.stringify(dates)); }, [dates]);
 
-  const tick = (key: string) => setTicked((p) => ({ ...p, [key]: !p[key] }));
+  const queryClient = useQueryClient();
+  const tick = (key: string) => {
+    const nowTicked = !ticked[key];
+    setTicked(p => ({ ...p, [key]: nowTicked }));
+    fetch("/api/player/chapter-completed", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ undo: !nowTicked }),
+    }).then(() => queryClient.invalidateQueries({ queryKey: getGetPlayerProfileQueryKey() }))
+      .catch(() => {});
+  };
   const setDate = (key: string, val: string) => {
     setDates((p) => val ? { ...p, [key]: val } : Object.fromEntries(Object.entries(p).filter(([k]) => k !== key)));
     setEditingDate(null);

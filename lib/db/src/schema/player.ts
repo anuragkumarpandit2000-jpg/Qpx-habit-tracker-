@@ -23,6 +23,8 @@ export const playersTable = pgTable("players", {
   bio: text("bio"),
   lastLoginDate: text("last_login_date"),
   loginStreakDay: integer("login_streak_day").notNull().default(0),
+  skillsLearned: integer("skills_learned").notNull().default(0),
+  chaptersCompleted: integer("chapters_completed").notNull().default(0),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
 });

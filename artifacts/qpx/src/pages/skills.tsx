@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { getGetPlayerProfileQueryKey } from "@workspace/api-client-react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   CheckCircle2, Circle, ChevronDown, ChevronRight,
@@ -8,6 +10,14 @@ import { cn } from "@/lib/utils";
 
 const STORAGE_TICKS    = "qpx-skill-ticks";
 const STORAGE_TARGETS  = "qpx-skill-targets";
+
+function getSkillTier(sectionName: string): "beginner" | "intermediate" | "advanced" {
+  const s = sectionName.toLowerCase();
+  if (s.includes("advanced") || s.includes("expert") || s.includes("hacking") || s.includes("dream") || s.includes("🌲")) return "advanced";
+  if (s.includes("intermediate") || s.includes("web") || s.includes("frontend") || s.includes("backend") || s.includes("database") || s.includes("language") || s.includes("security") || s.includes("tool") || s.includes("development") || s.includes("🌿") || s.includes("🌳") || s.includes("microcontroller") || s.includes("robotics") || s.includes("deployment") || s.includes("app development")) return "intermediate";
+  return "beginner";
+}
+const SKILL_XP: Record<string, number> = { beginner: 5, intermediate: 10, advanced: 20 };
 
 // ─── Types ────────────────────────────────────────────────────────────
 interface SkillSection { name: string; emoji?: string; skills: string[] }
@@ -312,6 +322,19 @@ export default function Skills() {
   useEffect(() => { localStorage.setItem(STORAGE_TICKS, JSON.stringify(ticked)); }, [ticked]);
   useEffect(() => { localStorage.setItem(STORAGE_TARGETS, JSON.stringify(targets)); }, [targets]);
 
+  const queryClient = useQueryClient();
+  const tickSkill = (key: string, sectionName: string) => {
+    const nowTicked = !ticked[key];
+    setTicked(p => ({ ...p, [key]: nowTicked }));
+    const tier = getSkillTier(sectionName);
+    fetch("/api/player/skill-learned", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ tier, undo: !nowTicked }),
+    }).then(() => queryClient.invalidateQueries({ queryKey: getGetPlayerProfileQueryKey() }))
+      .catch(() => {});
+  };
+
   const tickedCount = Object.values(ticked).filter(Boolean).length;
   const total       = totalSkills();
 
@@ -474,7 +497,7 @@ export default function Skills() {
                                               transition={{ delay: si * 0.02 }}
                                               className={cn("flex items-center gap-2.5 px-4 py-2.5 group hover:bg-white/5 transition-colors border-b border-border/10 last:border-0", done ? "opacity-55" : "")}>
 
-                                              <button onClick={() => setTicked(p => ({ ...p, [key]: !p[key] }))} className="flex-shrink-0">
+                                              <button onClick={() => tickSkill(key, sec.name)} className="flex-shrink-0">
                                                 <motion.div whileTap={{ scale: 0.8 }}>
                                                   {done
                                                     ? <CheckCircle2 className="w-4 h-4" style={{ color: cat.color }} />
@@ -485,6 +508,12 @@ export default function Skills() {
                                               <span className={cn("text-sm flex-1 leading-snug", done ? "line-through text-muted-foreground" : "text-foreground")}>
                                                 {skill}
                                               </span>
+                                              {!done && (
+                                                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded opacity-40 group-hover:opacity-90 transition-opacity flex-shrink-0"
+                                                  style={{ background: `${cat.color}15`, color: cat.color }}>
+                                                  +{SKILL_XP[getSkillTier(sec.name)]}xp
+                                                </span>
+                                              )}
 
                                               {targeted && (
                                                 <span className="text-[9px] px-1.5 py-0.5 rounded font-bold"
@@ -592,7 +621,10 @@ export default function Skills() {
                         </div>
 
                         {!skillDone && (
-                          <button onClick={() => setTicked(p => ({ ...p, [t.skillKey]: true }))}
+                          <button onClick={() => {
+                              const sectionName = t.skillKey.split("::")[1] ?? "";
+                              tickSkill(t.skillKey, sectionName);
+                            }}
                             className="w-full py-1.5 rounded-lg text-xs font-semibold text-center transition-colors hover:bg-white/10"
                             style={{ color: t.categoryColor, border: `1px solid ${t.categoryColor}30` }}>
                             Mark skill as learned ✓
