@@ -15,6 +15,7 @@ import BossBattles from "@/pages/boss-battles";
 import Inventory from "@/pages/inventory";
 import Rewards from "@/pages/rewards";
 import Settings from "@/pages/settings";
+import Chapter10 from "@/pages/chapter10";
 
 import { Layout } from "@/components/layout";
 
@@ -68,6 +69,9 @@ function Router() {
       </Route>
       <Route path="/settings">
         <Layout><Settings /></Layout>
+      </Route>
+      <Route path="/chapter10">
+        <Layout><Chapter10 /></Layout>
       </Route>
       
       <Route component={NotFound} />
