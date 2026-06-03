@@ -1,3 +1,5 @@
 - [QPX hook patterns](qpx-hook-patterns.md) — useClaimDailyLogin takes void; query hooks use double-Get prefix (getGetXxxQueryKey); no useGet* exports via `export const` (they use `export function`)
 - [QPX player profile null pattern](qpx-player-null.md) — GET /player/profile returns 200+null (not 404) when no player exists; Vite overlay intercepts 404s even with throwOnError:false
 - [QPX level system redesign](qpx-level-system.md) — rank index = level (not totalXp thresholds); Civilian=0, Recruit=1…Titan=10; level-up needs XP+skills+chapters; LEVEL_CONDITIONS array in rpg-system.ts; startup migration syncs rankIndex=level and xpToNextLevel to new thresholds
+- [QPX constants split pattern](qpx-constants-split.md) — non-component exports (RANKS, RANK_COLORS) live in lib/rank-constants.ts; mixing them in a .tsx file breaks Vite Fast Refresh
+- [QPX toast pattern](qpx-toast-pattern.md) — use useToast from @/hooks/use-toast (shadcn/ui); call toast({ title, description?, variant? }); NOT sonner's toast()

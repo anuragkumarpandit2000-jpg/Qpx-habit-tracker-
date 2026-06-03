@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { RANK_COLORS, RANKS } from "./rank-badge";
+import { RANK_COLORS, RANKS } from "@/lib/rank-constants";
 
 function lerp(a: number, b: number, t: number) {
   return a + (b - a) * t;

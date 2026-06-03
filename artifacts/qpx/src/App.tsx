@@ -17,6 +17,8 @@ import Rewards from "@/pages/rewards";
 import Settings from "@/pages/settings";
 import Chapter10 from "@/pages/chapter10";
 import Skills from "@/pages/skills";
+import SystemTab from "@/pages/system";
+import TodaysTargets from "@/pages/targets";
 
 import { Layout } from "@/components/layout";
 
@@ -76,6 +78,12 @@ function Router() {
       </Route>
       <Route path="/skills">
         <Layout><Skills /></Layout>
+      </Route>
+      <Route path="/system">
+        <Layout><SystemTab /></Layout>
+      </Route>
+      <Route path="/targets">
+        <Layout><TodaysTargets /></Layout>
       </Route>
       
       <Route component={NotFound} />

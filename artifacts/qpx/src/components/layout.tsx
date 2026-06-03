@@ -14,6 +14,8 @@ import {
   Zap,
   GraduationCap,
   FlameKindling,
+  Cpu,
+  Target,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useGetPlayerProfile } from "@workspace/api-client-react";
@@ -24,7 +26,9 @@ const NAV_ITEMS = [
   { path: "/quests", icon: Sword, label: "Quests" },
   { path: "/achievements", icon: Trophy, label: "Achievements" },
   { path: "/skills", icon: FlameKindling, label: "Skills" },
+  { path: "/targets", icon: Target, label: "Today's Targets" },
   { path: "/chapter10", icon: GraduationCap, label: "Chapter 10" },
+  { path: "/system", icon: Cpu, label: "System" },
   { path: "/journal", icon: BookOpen, label: "Journal" },
   { path: "/stats", icon: BarChart3, label: "Stats" },
   { path: "/boss-battles", icon: Skull, label: "Boss Battles" },

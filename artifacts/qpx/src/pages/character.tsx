@@ -1,7 +1,8 @@
 import { Suspense, lazy, useMemo } from "react";
 import { motion } from "framer-motion";
 import { useGetPlayerProfile, useGetInventory } from "@workspace/api-client-react";
-import { RankBadge, RANKS, RANK_COLORS } from "@/components/rank-badge";
+import { RankBadge } from "@/components/rank-badge";
+import { RANKS, RANK_COLORS } from "@/lib/rank-constants";
 import { Shield, ChevronRight, Lock, Coins, Zap, Flame, CheckCircle2, Circle } from "lucide-react";
 import CharacterFallback from "@/components/character-3d-fallback";
 

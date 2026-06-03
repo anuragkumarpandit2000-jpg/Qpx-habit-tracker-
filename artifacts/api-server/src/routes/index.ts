@@ -9,6 +9,7 @@ import { bossBattlesRouter } from "./boss-battles";
 import { inventoryRouter } from "./inventory";
 import { dailyLoginRouter } from "./daily-login";
 import { seasonsRouter } from "./seasons";
+import systemRouter from "./system";
 
 const router: IRouter = Router();
 
@@ -22,5 +23,6 @@ router.use(bossBattlesRouter);
 router.use(inventoryRouter);
 router.use(dailyLoginRouter);
 router.use(seasonsRouter);
+router.use(systemRouter);
 
 export default router;

@@ -16,7 +16,7 @@ export class WebGLErrorBoundary extends Component<{ children: ReactNode; fallbac
     return this.props.children;
   }
 }
-import { RANKS, RANK_COLORS } from "./rank-badge";
+import { RANKS, RANK_COLORS } from "@/lib/rank-constants";
 
 // ─── Skin & outfit tones ───────────────────────────────────────────────────
 const SKIN_COLOR = "#c68642";

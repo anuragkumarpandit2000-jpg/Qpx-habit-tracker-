@@ -19,6 +19,16 @@ const POMO_MODES = {
 } as const;
 type PomoMode = keyof typeof POMO_MODES;
 
+const POMO_KEY = "qpx-pomodoro-config";
+function getPomoMinutes(mode: PomoMode): number {
+  try {
+    const cfg = JSON.parse(localStorage.getItem(POMO_KEY) || "{}") as Partial<Record<PomoMode, number>>;
+    return cfg[mode] ?? POMO_MODES[mode].minutes;
+  } catch {
+    return POMO_MODES[mode].minutes;
+  }
+}
+
 function playBeep() {
   try {
     const ctx = new AudioContext();
@@ -117,13 +127,13 @@ const DATE_COLORS = {
 // ─── Pomodoro Component ──────────────────────────────────────────────
 function PomodoroWidget() {
   const [mode, setMode]           = useState<PomoMode>("focus");
-  const [secondsLeft, setLeft]    = useState(POMO_MODES.focus.minutes * 60);
+  const [secondsLeft, setLeft]    = useState(() => getPomoMinutes("focus") * 60);
   const [running, setRunning]     = useState(false);
   const [sessions, setSessions]   = useState(0);
   const [open, setOpen]           = useState(true);
   const intervalRef               = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const totalSeconds = POMO_MODES[mode].minutes * 60;
+  const totalSeconds = getPomoMinutes(mode) * 60;
   const modeColor    = POMO_MODES[mode].color;
   const radius       = 36;
   const circumference= 2 * Math.PI * radius;
@@ -132,12 +142,12 @@ function PomodoroWidget() {
 
   const switchMode = useCallback((m: PomoMode) => {
     setMode(m);
-    setLeft(POMO_MODES[m].minutes * 60);
+    setLeft(getPomoMinutes(m) * 60);
     setRunning(false);
   }, []);
 
   const reset = useCallback(() => {
-    setLeft(POMO_MODES[mode].minutes * 60);
+    setLeft(getPomoMinutes(mode) * 60);
     setRunning(false);
   }, [mode]);
 

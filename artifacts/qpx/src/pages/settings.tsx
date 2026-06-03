@@ -10,7 +10,8 @@ import { Settings as SettingsIcon, Save, User, Tag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { RankBadge, RANKS } from "@/components/rank-badge";
+import { RankBadge } from "@/components/rank-badge";
+import { RANKS } from "@/lib/rank-constants";
 
 const TITLES = [
   "Book Slayer", "Study Titan", "Iron Warrior", "Discipline King",

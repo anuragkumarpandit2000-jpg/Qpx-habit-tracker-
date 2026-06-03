@@ -15,7 +15,8 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import { Zap, Heart, Coins, Flame, CheckCircle2, Circle, Shield, Star, Gift, Trophy } from "lucide-react";
 import { motion as m } from "framer-motion";
-import { RankBadge, RANK_COLORS } from "@/components/rank-badge";
+import { RankBadge } from "@/components/rank-badge";
+import { RANK_COLORS } from "@/lib/rank-constants";
 import { XpFloat, LevelUpBanner } from "@/components/xp-animation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
