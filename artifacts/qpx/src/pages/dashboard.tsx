@@ -48,6 +48,7 @@ export default function Dashboard() {
   const [xpAmount, setXpAmount] = useState(0);
   const [showLevelUp, setShowLevelUp] = useState(false);
   const [newLevel, setNewLevel] = useState(1);
+  const [newRankIndex, setNewRankIndex] = useState(0);
   const [loginClaimed, setLoginClaimed] = useState(false);
   const [claimToast, setClaimToast] = useState<string | null>(null);
   const autoClaimFired = useRef(false);
@@ -82,9 +83,9 @@ export default function Dashboard() {
     if (result.leveledUp) {
       setTimeout(() => {
         setNewLevel(result.player.level);
+        setNewRankIndex(result.player.rankIndex);
         setShowLevelUp(true);
-        setTimeout(() => setShowLevelUp(false), 3000);
-      }, 1000);
+      }, 900);
     }
     queryClient.invalidateQueries({ queryKey: getGetPlayerProfileQueryKey() });
     queryClient.invalidateQueries({ queryKey: getGetQuestsQueryKey() });
@@ -126,7 +127,7 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen" style={{ background: timeOfDay.gradient }}>
       <XpFloat amount={xpAmount} visible={showXp} onComplete={() => setShowXp(false)} />
-      <LevelUpBanner visible={showLevelUp} level={newLevel} onComplete={() => setShowLevelUp(false)} />
+      <LevelUpBanner visible={showLevelUp} level={newLevel} rankIndex={newRankIndex} onComplete={() => setShowLevelUp(false)} />
 
       {/* Auto-claim toast */}
       <AnimatePresence>
