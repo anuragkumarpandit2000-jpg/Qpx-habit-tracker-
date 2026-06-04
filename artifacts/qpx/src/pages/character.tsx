@@ -84,7 +84,7 @@ export default function Character() {
       >
         {checkWebGL() ? (
           <Suspense fallback={<CharacterFallback rankIndex={player.rankIndex} level={player.level} />}>
-            <CharacterScene3D rankIndex={player.rankIndex} level={player.level} />
+            <CharacterScene3D rankIndex={player.rankIndex} level={player.level} equippedOutfit={inventory?.equippedOutfit ?? undefined} />
           </Suspense>
         ) : (
           <CharacterFallback rankIndex={player.rankIndex} level={player.level} />

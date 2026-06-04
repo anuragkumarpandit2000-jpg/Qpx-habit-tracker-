@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { db, pool, playersTable, questsTable, rankHistoryTable } from "@workspace/db";
+import { db, pool, playersTable, questsTable, rankHistoryTable, inventoryItemsTable, playerInventoryTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import {
   UpdatePlayerProfileBody,
@@ -14,6 +14,51 @@ import {
 import { achievementsTable } from "@workspace/db";
 
 const router = Router();
+
+// ── Rank → outfit auto-equip on promotion ─────────────────────────────────────
+const RANK_OUTFIT_MAP: Record<number, string> = {
+  0: "Recruit Uniform",   // Civilian
+  1: "Recruit Uniform",   // Recruit
+  2: "Cadet Armor",       // Cadet
+  3: "Cadet Armor",       // Trainee
+  4: "Warrior Plate",     // Warrior
+  5: "Warrior Plate",     // Elite Warrior
+  6: "Champion's Gear",   // Champion
+  7: "Champion's Gear",   // Legend
+  8: "Champion's Gear",   // Master
+  9: "Titan Armor",       // Grandmaster
+  10: "Titan Armor",      // Titan
+};
+
+async function autoEquipRankOutfit(newRankIndex: number) {
+  const outfitName = RANK_OUTFIT_MAP[newRankIndex];
+  if (!outfitName) return;
+
+  const [item] = await db.select().from(inventoryItemsTable)
+    .where(eq(inventoryItemsTable.name, outfitName));
+  if (!item) return;
+
+  if (!item.unlocked) {
+    await db.update(inventoryItemsTable)
+      .set({ unlocked: true })
+      .where(eq(inventoryItemsTable.id, item.id));
+  }
+
+  if (!item.equipped) {
+    await db.update(inventoryItemsTable)
+      .set({ equipped: false })
+      .where(eq(inventoryItemsTable.type, "outfit"));
+    await db.update(inventoryItemsTable)
+      .set({ equipped: true })
+      .where(eq(inventoryItemsTable.id, item.id));
+    const [inv] = await db.select().from(playerInventoryTable).limit(1);
+    if (inv) {
+      await db.update(playerInventoryTable)
+        .set({ equippedOutfit: outfitName })
+        .where(eq(playerInventoryTable.id, inv.id));
+    }
+  }
+}
 
 // ── Run DB migration once on startup ──────────────────────────────────────────
 let migrated = false;
@@ -93,6 +138,7 @@ async function updatePlayerXp(
 
   if (rankPromoted) {
     await db.insert(rankHistoryTable).values({ rank: RANKS[newRankIndex] });
+    await autoEquipRankOutfit(newRankIndex);
   }
 
   return { player: updated, leveledUp, rankPromoted, newLevel, newRank: RANKS[newRankIndex] };
