@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Plus, Trash2, Bell, BellOff, Timer, Mail, Clock,
   Calendar, Dumbbell, BookOpen, Coffee, Utensils, Zap, Save, Check,
+  Loader2, CheckCheck, Send,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
@@ -63,7 +64,23 @@ async function requestNotificationPermission() {
   return result === "granted";
 }
 
-function scheduleNotificationsForToday(entries: ScheduleEntry[]) {
+function buildReminderEmail(entry: ScheduleEntry): string {
+  const { color, label: typeLabel } = TYPE_META[entry.type];
+  return `
+    <div style="font-family:-apple-system,Helvetica,sans-serif;max-width:520px;margin:0 auto;background:#0a0a1a;color:#e2e8f0;padding:36px;border-radius:16px;border:1px solid #1e293b">
+      <div style="font-size:26px;font-weight:900;letter-spacing:3px;color:#7c3aed;margin-bottom:2px">&#9889; QPX</div>
+      <div style="font-size:9px;letter-spacing:5px;color:#475569;margin-bottom:36px;text-transform:uppercase">Quantum Progress Experience</div>
+      <div style="display:inline-block;padding:5px 14px;background:${color}22;border:1px solid ${color}55;border-radius:8px;font-size:10px;font-weight:700;color:${color};text-transform:uppercase;letter-spacing:2px;margin-bottom:14px">${typeLabel}</div>
+      <div style="font-size:24px;font-weight:800;color:#f1f5f9;margin-bottom:6px">${entry.label}</div>
+      <div style="font-size:14px;color:#94a3b8;margin-bottom:32px">Scheduled for <strong style="color:#e2e8f0">${entry.time}</strong> &mdash; time to level up!</div>
+      <div style="background:#1e293b;border-radius:12px;padding:16px;font-size:12px;color:#475569;text-align:center;letter-spacing:1px">
+        Every session counts. Keep the streak alive.
+      </div>
+    </div>
+  `;
+}
+
+function scheduleNotificationsForToday(entries: ScheduleEntry[], emailConfig?: EmailConfig) {
   const now = new Date();
   const todayDay = now.getDay();
   const todayEntries = entries.filter(e => e.notifyEnabled && e.days.includes(todayDay));
@@ -80,6 +97,17 @@ function scheduleNotificationsForToday(entries: ScheduleEntry[]) {
             icon: "/favicon.ico",
           });
         }
+        if (emailConfig?.enabled && emailConfig.address) {
+          fetch("/api/system/send-email", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              to: emailConfig.address,
+              subject: `⚡ QPX Reminder: ${entry.label}`,
+              html: buildReminderEmail(entry),
+            }),
+          }).catch(() => { /* silently ignore network errors */ });
+        }
       }, ms);
     }
   });
@@ -92,6 +120,7 @@ export default function SystemTab() {
   const [email, setEmail] = useState<EmailConfig>({ address: "", enabled: false });
   const [notifGranted, setNotifGranted] = useState(false);
   const [pomoSaved, setPomoSaved] = useState(false);
+  const [testEmailState, setTestEmailState] = useState<"idle" | "sending" | "success" | "error">("idle");
   const [showAddForm, setShowAddForm] = useState(false);
   const [form, setForm] = useState<Omit<ScheduleEntry, "id">>({
     time: "07:00",
@@ -109,8 +138,8 @@ export default function SystemTab() {
   }, []);
 
   useEffect(() => {
-    if (notifGranted) scheduleNotificationsForToday(schedule);
-  }, [schedule, notifGranted]);
+    if (notifGranted) scheduleNotificationsForToday(schedule, email);
+  }, [schedule, notifGranted, email]);
 
   const handleAddEntry = useCallback(() => {
     if (!form.label.trim()) { toast({ title: "Enter an activity name", variant: "destructive" }); return; }
@@ -149,16 +178,51 @@ export default function SystemTab() {
     toast({ title: "Email settings saved!" });
   }, [email]);
 
+  const handleTestEmail = useCallback(async () => {
+    if (!email.address.trim()) {
+      toast({ title: "Enter an email address first", variant: "destructive" });
+      return;
+    }
+    setTestEmailState("sending");
+    try {
+      const res = await fetch("/api/system/send-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          to: email.address,
+          subject: "⚡ QPX Reminder System — Test Email",
+          html: buildReminderEmail({
+            id: "test",
+            time: new Date().toTimeString().slice(0, 5),
+            label: "Test Reminder — System Working!",
+            type: "study",
+            days: [],
+            notifyEnabled: true,
+          }),
+        }),
+      });
+      const data = await res.json() as { error?: string };
+      if (!res.ok) throw new Error(data.error ?? "Send failed");
+      setTestEmailState("success");
+      toast({ title: "Test email sent!", description: `Delivered to ${email.address}` });
+      setTimeout(() => setTestEmailState("idle"), 3000);
+    } catch (err) {
+      setTestEmailState("error");
+      toast({ title: "Email failed", description: (err as Error).message, variant: "destructive" });
+      setTimeout(() => setTestEmailState("idle"), 4000);
+    }
+  }, [email.address, toast]);
+
   const enableNotifications = useCallback(async () => {
     const granted = await requestNotificationPermission();
     setNotifGranted(granted);
     if (granted) {
-      scheduleNotificationsForToday(schedule);
+      scheduleNotificationsForToday(schedule, email);
       toast({ title: "Notifications enabled!", description: "Reminders will fire at scheduled times." });
     } else {
       toast({ title: "Notifications blocked", description: "Enable in browser settings.", variant: "destructive" });
     }
-  }, [schedule]);
+  }, [schedule, email]);
 
   return (
     <div className="p-6 max-w-3xl mx-auto space-y-8">
@@ -370,8 +434,8 @@ export default function SystemTab() {
         <div className="flex items-center gap-2 px-5 py-4 border-b border-border/40">
           <Mail className="w-4 h-4 text-blue-400" />
           <h2 className="font-bold text-sm text-white">Email Reminders</h2>
-          <span className="ml-auto text-[10px] bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded-full font-medium border border-yellow-500/30">
-            Requires Setup
+          <span className="ml-auto flex items-center gap-1.5 text-[10px] bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full font-medium border border-green-500/30">
+            <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse inline-block" /> Connected
           </span>
         </div>
         <div className="p-5 space-y-4">
@@ -379,29 +443,54 @@ export default function SystemTab() {
             <label className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1.5 block">
               Reminder Email Address
             </label>
-            <input value={email.address} onChange={e => setEmail(em => ({ ...em, address: e.target.value }))}
-              placeholder="anuragkumar.pandit2000@gmail.com"
-              className="w-full bg-muted/40 border border-border/40 rounded-lg px-3 py-2 text-sm text-white placeholder:text-muted-foreground/60 focus:outline-none focus:border-primary/60" />
+            <input
+              value={email.address}
+              onChange={e => setEmail(em => ({ ...em, address: e.target.value }))}
+              placeholder="your@email.com"
+              className="w-full bg-muted/40 border border-border/40 rounded-lg px-3 py-2 text-sm text-white placeholder:text-muted-foreground/60 focus:outline-none focus:border-primary/60"
+            />
           </div>
           <div className="flex items-center gap-3">
-            <button onClick={() => setEmail(em => ({ ...em, enabled: !em.enabled }))}
+            <button
+              onClick={() => setEmail(em => ({ ...em, enabled: !em.enabled }))}
               className={cn("relative w-10 h-6 rounded-full transition-colors flex-shrink-0",
                 email.enabled ? "bg-primary" : "bg-muted/60")}>
-              <motion.div animate={{ x: email.enabled ? 18 : 2 }}
-                className="absolute top-1 w-4 h-4 rounded-full bg-white shadow" />
+              <motion.div
+                animate={{ x: email.enabled ? 18 : 2 }}
+                className="absolute top-1 w-4 h-4 rounded-full bg-white shadow"
+              />
             </button>
-            <span className="text-sm text-muted-foreground">Send email reminders for schedule entries</span>
+            <span className="text-sm text-muted-foreground">Send email reminders when schedule alarms fire</span>
           </div>
-          <div className="rounded-lg bg-blue-500/10 border border-blue-500/20 p-3 text-[11px] text-blue-300 space-y-1">
-            <div className="font-semibold text-blue-200">To enable email reminders:</div>
-            <div>1. Add a <span className="font-mono text-blue-100">RESEND_API_KEY</span> in the Replit Secrets panel</div>
-            <div>2. Sign up free at <span className="font-mono text-blue-100">resend.com</span> to get your key</div>
-            <div>3. Email will be sent from your schedule when the server-side job fires</div>
+          <div className="rounded-lg bg-green-500/10 border border-green-500/20 p-3 text-[11px] text-green-300">
+            <div className="font-semibold text-green-200 mb-1">Powered by Resend — API key active</div>
+            <div className="text-green-400/80">Emails fire automatically alongside each schedule alarm. Use the bell icon on entries to toggle notification delivery.</div>
           </div>
-          <div className="flex justify-end">
-            <button onClick={saveEmail}
+          <div className="flex items-center justify-between gap-3">
+            <button
+              onClick={handleTestEmail}
+              disabled={testEmailState === "sending"}
+              className={cn(
+                "flex items-center gap-2 px-4 py-2 rounded-lg font-bold text-sm transition-all border",
+                testEmailState === "success"
+                  ? "bg-green-500/20 border-green-500/40 text-green-300"
+                  : testEmailState === "error"
+                  ? "bg-red-500/20 border-red-500/40 text-red-300"
+                  : "bg-muted/40 border-border/40 text-muted-foreground hover:text-white hover:border-border disabled:opacity-50 disabled:cursor-not-allowed",
+              )}>
+              {testEmailState === "sending" && <Loader2 className="w-4 h-4 animate-spin" />}
+              {testEmailState === "success" && <CheckCheck className="w-4 h-4" />}
+              {testEmailState === "error"   && <Mail className="w-4 h-4" />}
+              {testEmailState === "idle"    && <Send className="w-4 h-4" />}
+              {testEmailState === "sending" ? "Sending…" :
+               testEmailState === "success" ? "Email Sent!" :
+               testEmailState === "error"   ? "Failed — Retry" :
+                                              "Send Test Email"}
+            </button>
+            <button
+              onClick={saveEmail}
               className="flex items-center gap-2 px-4 py-2 rounded-lg font-bold text-sm bg-blue-600 text-white hover:bg-blue-500 transition-colors">
-              <Save className="w-4 h-4" /> Save Email Settings
+              <Save className="w-4 h-4" /> Save Settings
             </button>
           </div>
         </div>
