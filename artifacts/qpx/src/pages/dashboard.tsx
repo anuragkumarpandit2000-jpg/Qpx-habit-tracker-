@@ -21,6 +21,8 @@ import { XpFloat, LevelUpBanner } from "@/components/xp-animation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import SeasonTransition, { SeasonStats } from "@/components/season-transition";
+import { SEASON_DATA } from "@/lib/season-data";
 
 const CATEGORY_COLORS: Record<string, string> = {
   mind: "hsl(270 70% 60%)",
@@ -52,6 +54,10 @@ export default function Dashboard() {
   const [loginClaimed, setLoginClaimed] = useState(false);
   const [claimToast, setClaimToast] = useState<string | null>(null);
   const autoClaimFired = useRef(false);
+  const [showSeasonTransition, setShowSeasonTransition] = useState(false);
+  const [transitionCompletedSeason, setTransitionCompletedSeason] = useState(1);
+  const [transitionNextSeason, setTransitionNextSeason] = useState(2);
+  const [transitionStats, setTransitionStats] = useState<SeasonStats | null>(null);
 
   const { data: player, isLoading: playerLoading } = useGetPlayerProfile();
   const { data: quests = [] } = useGetQuests();
@@ -78,8 +84,24 @@ export default function Dashboard() {
 
   const handleCompleteQuest = async (questId: number) => {
     const result = await completeQuest.mutateAsync({ id: questId });
+    const r = result as any;
     setXpAmount(result.xpGained);
     setShowXp(true);
+    if (r.seasonCompleted) {
+      setTransitionCompletedSeason(r.completedSeason ?? 1);
+      setTransitionNextSeason(r.nextSeason ?? 2);
+      setTransitionStats({
+        totalXp: r.preAdvanceStats?.totalXp ?? result.player.totalXp,
+        streak: r.preAdvanceStats?.streak ?? 0,
+        longestStreak: r.preAdvanceStats?.longestStreak ?? 0,
+        finalRank: r.seasonFinalRank ?? result.player.rank ?? "Champion",
+        finalTitle: r.preAdvanceStats?.finalTitle ?? "Titan",
+        level: r.preAdvanceStats?.level ?? 10,
+        questsCompleted: quests.filter((q) => q.completed).length + 1,
+      });
+      setShowSeasonTransition(true);
+      return;
+    }
     if (result.leveledUp) {
       setTimeout(() => {
         setNewLevel(result.player.level);
@@ -100,6 +122,13 @@ export default function Dashboard() {
     } catch {
       // silently ignore
     }
+  };
+
+  const handleSeasonTransitionComplete = () => {
+    setShowSeasonTransition(false);
+    queryClient.invalidateQueries({ queryKey: getGetPlayerProfileQueryKey() });
+    queryClient.invalidateQueries({ queryKey: getGetQuestsQueryKey() });
+    queryClient.invalidateQueries({ queryKey: getGetRecentAchievementsQueryKey() });
   };
 
   if (playerLoading) {
@@ -128,6 +157,14 @@ export default function Dashboard() {
     <div className="min-h-screen" style={{ background: timeOfDay.gradient }}>
       <XpFloat amount={xpAmount} visible={showXp} onComplete={() => setShowXp(false)} />
       <LevelUpBanner visible={showLevelUp} level={newLevel} rankIndex={newRankIndex} onComplete={() => setShowLevelUp(false)} />
+      {showSeasonTransition && transitionStats && (
+        <SeasonTransition
+          completedSeason={transitionCompletedSeason}
+          nextSeason={transitionNextSeason}
+          stats={transitionStats}
+          onComplete={handleSeasonTransitionComplete}
+        />
+      )}
 
       {/* Auto-claim toast */}
       <AnimatePresence>
@@ -146,20 +183,25 @@ export default function Dashboard() {
       </AnimatePresence>
 
       <div className="max-w-2xl mx-auto px-4 py-6 space-y-5">
-        {/* Season banner */}
-        {season && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="glass-panel rounded-xl px-4 py-2.5 flex items-center justify-between"
-          >
-            <div className="flex items-center gap-2">
-              <Star className="w-3.5 h-3.5 text-yellow-400" />
-              <span className="text-xs font-semibold text-yellow-400">{season.name}: {season.subtitle}</span>
-            </div>
-            <span className="text-[10px] text-muted-foreground">Until {season.endDate}</span>
-          </motion.div>
-        )}
+        {/* Season banner — uses player's currentSeason for accurate display */}
+        {(() => {
+          const sd = SEASON_DATA[Math.max(0, ((player as any)?.currentSeason ?? 1) - 1)];
+          if (!sd) return null;
+          return (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="glass-panel rounded-xl px-4 py-2.5 flex items-center justify-between"
+              style={{ borderColor: `${sd.primaryColor}30` }}
+            >
+              <div className="flex items-center gap-2">
+                <span className="text-sm">{sd.emoji}</span>
+                <span className="text-xs font-semibold" style={{ color: sd.accentColor }}>{sd.name}: {sd.title}</span>
+              </div>
+              <span className="text-[10px] text-muted-foreground">{sd.theme}</span>
+            </motion.div>
+          );
+        })()}
 
         {/* Player profile card */}
         <motion.div

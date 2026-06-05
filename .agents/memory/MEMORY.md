@@ -3,3 +3,4 @@
 - [QPX level system redesign](qpx-level-system.md) — rank index = level (not totalXp thresholds); Civilian=0, Recruit=1…Titan=10; level-up needs XP+skills+chapters; LEVEL_CONDITIONS array in rpg-system.ts; startup migration syncs rankIndex=level and xpToNextLevel to new thresholds
 - [QPX constants split pattern](qpx-constants-split.md) — non-component exports (RANKS, RANK_COLORS) live in lib/rank-constants.ts; mixing them in a .tsx file breaks Vite Fast Refresh
 - [QPX toast pattern](qpx-toast-pattern.md) — use useToast from @/hooks/use-toast (shadcn/ui); call toast({ title, description?, variant? }); NOT sonner's toast()
+- [QPX season transition system](qpx-season-transition.md) — 6 seasons; currentSeason on player resets on level 10 completion; updatePlayerXp returns achievedRankIndex/achievedLevel for correct achievement checks after season reset

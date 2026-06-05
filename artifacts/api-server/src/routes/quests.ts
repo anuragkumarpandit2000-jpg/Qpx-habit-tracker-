@@ -164,11 +164,13 @@ router.post("/quests/:id/complete", async (req, res): Promise<void> => {
       newProgress = crCompleted;
       shouldUnlock = ach.target !== null && newProgress >= ach.target;
     } else if (ach.category === "level") {
-      shouldUnlock = ach.target !== null && result.newLevel >= ach.target;
-      newProgress = result.newLevel;
+      const checkLevel = result.achievedLevel ?? result.newLevel;
+      shouldUnlock = ach.target !== null && checkLevel >= ach.target;
+      newProgress = checkLevel;
     } else if (ach.category === "rank") {
-      shouldUnlock = ach.target !== null && result.player.rankIndex >= ach.target;
-      newProgress = result.player.rankIndex;
+      const checkRank = result.achievedRankIndex ?? result.player.rankIndex;
+      shouldUnlock = ach.target !== null && checkRank >= ach.target;
+      newProgress = checkRank;
     }
 
     if (shouldUnlock) {
@@ -202,6 +204,11 @@ router.post("/quests/:id/complete", async (req, res): Promise<void> => {
       unlockedAt: a.unlockedAt?.toISOString() ?? null,
       createdAt: a.createdAt.toISOString(),
     })),
+    seasonCompleted: result.seasonCompleted,
+    completedSeason: result.completedSeason,
+    nextSeason: result.nextSeason,
+    seasonFinalRank: result.seasonFinalRank,
+    preAdvanceStats: result.preAdvanceStats,
   });
 });
 

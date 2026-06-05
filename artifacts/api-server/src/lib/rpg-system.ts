@@ -1,17 +1,30 @@
-// Ranks — index = level (level 0 = Civilian, level 1 = Recruit, etc.)
-export const RANKS = [
-  "Civilian",       // Level 0  — starting rank
-  "Recruit",        // Level 1
-  "Cadet",          // Level 2
-  "Trainee",        // Level 3
-  "Warrior",        // Level 4
-  "Elite Warrior",  // Level 5
-  "Champion",       // Level 6
-  "Legend",         // Level 7
-  "Master",         // Level 8
-  "Grandmaster",    // Level 9
-  "Titan",          // Level 10
+// ── Season-specific ranks (6 seasons × 11 levels each, index 0 = Civilian) ──
+export const SEASON_RANKS: string[][] = [
+  // Season 1 — Rise of Titan
+  ["Civilian", "Recruit", "Cadet", "Apprentice", "Trainee", "Initiate", "Warrior", "Elite Warrior", "Vanguard", "Guardian", "Champion"],
+  // Season 2 — Path of Ascension
+  ["Civilian", "Seeker", "Explorer", "Pathfinder", "Climber", "Challenger", "Conqueror", "Ascender", "Evolutionary", "Zenith Walker", "Ascendant"],
+  // Season 3 — Age of Legends
+  ["Civilian", "Storyteller", "Adventurer", "Hero", "Veteran", "Guardian Hero", "Myth Walker", "Epic Warrior", "Legend Maker", "Immortal Hero", "Legend"],
+  // Season 4 — Master Protocol
+  ["Civilian", "Student", "Practitioner", "Specialist", "Technician", "Expert", "Professional", "Strategist", "Architect", "Virtuoso", "Master"],
+  // Season 5 — Beyond Human
+  ["Civilian", "Enhanced", "Optimized", "Refined", "Advanced", "Superior", "Hyperion", "Elite Prime", "Apex Runner", "Transcendent", "Beyond Human"],
+  // Season 6 — Quantum Awakening
+  ["Civilian", "Awakened", "Enlightened", "Quantum Seeker", "Quantum Walker", "Quantum Knight", "Quantum Sage", "Quantum Lord", "Quantum Sovereign", "Quantum Prime", "Quantum Emperor"],
 ];
+
+export const SEASON_FINAL_TITLES = [
+  "Titan", "Ascendant", "Legend", "Master", "Beyond Human", "Quantum Emperor",
+];
+
+export function getSeasonRank(season: number, rankIndex: number): string {
+  const s = Math.max(0, Math.min((season || 1) - 1, SEASON_RANKS.length - 1));
+  return SEASON_RANKS[s][Math.min(Math.max(0, rankIndex), 10)] ?? "Civilian";
+}
+
+// Legacy — Season 1 ranks for backward compat
+export const RANKS = SEASON_RANKS[0];
 
 // Per-level conditions to level up (XP earned this level + skills + chapters)
 export const LEVEL_CONDITIONS = [

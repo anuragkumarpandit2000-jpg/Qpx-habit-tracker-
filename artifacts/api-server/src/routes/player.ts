@@ -10,6 +10,7 @@ import {
   getRankIndex, computeLevelUp, getLevelUpCondition,
   RANKS, DEFAULT_QUESTS, ACHIEVEMENTS_SEED,
   SKILL_REWARDS, CHAPTER_REWARD,
+  getSeasonRank, SEASON_FINAL_TITLES, LEVEL_CONDITIONS,
 } from "../lib/rpg-system";
 import { achievementsTable } from "@workspace/db";
 
@@ -69,6 +70,7 @@ async function runMigration() {
     await pool.query(`
       ALTER TABLE players ADD COLUMN IF NOT EXISTS skills_learned INTEGER NOT NULL DEFAULT 0;
       ALTER TABLE players ADD COLUMN IF NOT EXISTS chapters_completed INTEGER NOT NULL DEFAULT 0;
+      ALTER TABLE players ADD COLUMN IF NOT EXISTS current_season INTEGER NOT NULL DEFAULT 1;
     `);
     // Sync rankIndex = level, and fix xpToNextLevel to new thresholds
     await pool.query(`
@@ -105,6 +107,7 @@ async function updatePlayerXp(
   xpGain: number,
   coinGain = 0
 ) {
+  const currentSeasonNum = player.currentSeason ?? 1;
   const newTotalXp = player.totalXp + xpGain;
   const currentXpInLevel = (player.xp ?? 0) + xpGain;
   const skillsLearned = player.skillsLearned ?? 0;
@@ -123,6 +126,19 @@ async function updatePlayerXp(
   const rankPromoted = newRankIndex > (player.rankIndex ?? 0);
   const newCoins = (player.coins ?? 0) + coinGain;
 
+  // Detect season completion: player reached level 10 (final rank) of current season
+  const seasonCompleted = rankPromoted && newRankIndex >= 10 && currentSeasonNum <= 6;
+  const nextSeasonNum = seasonCompleted ? Math.min(currentSeasonNum + 1, 7) : currentSeasonNum;
+  const seasonFinalRank = seasonCompleted ? getSeasonRank(currentSeasonNum, 10) : "";
+  const preAdvanceStats = seasonCompleted ? {
+    totalXp: newTotalXp,
+    streak: player.streak ?? 0,
+    longestStreak: player.longestStreak ?? 0,
+    finalRank: getSeasonRank(currentSeasonNum, 10),
+    finalTitle: SEASON_FINAL_TITLES[currentSeasonNum - 1] ?? "Champion",
+    level: newLevel,
+  } : null;
+
   const [updated] = await db
     .update(playersTable)
     .set({
@@ -137,17 +153,61 @@ async function updatePlayerXp(
     .returning();
 
   if (rankPromoted) {
-    await db.insert(rankHistoryTable).values({ rank: RANKS[newRankIndex] });
+    await db.insert(rankHistoryTable).values({ rank: getSeasonRank(currentSeasonNum, newRankIndex) });
     await autoEquipRankOutfit(newRankIndex);
   }
 
-  return { player: updated, leveledUp, rankPromoted, newLevel, newRank: RANKS[newRankIndex] };
+  // Season completed — advance to next season, reset progression
+  if (seasonCompleted) {
+    const finalTitle = SEASON_FINAL_TITLES[currentSeasonNum - 1] ?? "Champion";
+    await db.update(playersTable)
+      .set({
+        currentSeason: nextSeasonNum,
+        level: 0,
+        xp: 0,
+        xpToNextLevel: LEVEL_CONDITIONS[0].xp,
+        rankIndex: 0,
+        title: finalTitle,
+      })
+      .where(eq(playersTable.id, player.id));
+
+    const [advancedPlayer] = await db.select().from(playersTable).where(eq(playersTable.id, player.id));
+    return {
+      player: advancedPlayer,
+      leveledUp,
+      rankPromoted,
+      newLevel: 0,
+      achievedLevel: newLevel,
+      achievedRankIndex: newRankIndex,
+      newRank: getSeasonRank(nextSeasonNum, 0),
+      seasonCompleted: true,
+      completedSeason: currentSeasonNum,
+      nextSeason: nextSeasonNum,
+      seasonFinalRank,
+      preAdvanceStats,
+    };
+  }
+
+  return {
+    player: updated,
+    leveledUp,
+    rankPromoted,
+    newLevel,
+    achievedLevel: newLevel,
+    achievedRankIndex: newRankIndex,
+    newRank: getSeasonRank(currentSeasonNum, newRankIndex),
+    seasonCompleted: false,
+    completedSeason: currentSeasonNum,
+    nextSeason: currentSeasonNum,
+    seasonFinalRank: "",
+    preAdvanceStats: null,
+  };
 }
 
 function formatPlayer(p: typeof playersTable.$inferSelect) {
   return {
     ...p,
-    rank: RANKS[p.rankIndex] ?? "Civilian",
+    rank: getSeasonRank(p.currentSeason ?? 1, p.rankIndex),
     createdAt: p.createdAt.toISOString(),
     updatedAt: p.updatedAt?.toISOString(),
   };
